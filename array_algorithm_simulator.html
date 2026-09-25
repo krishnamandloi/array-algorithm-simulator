@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Array Algorithm Simulator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#0f172a;color:#e5e7eb}
+.container{max-width:1200px;margin:auto;padding:24px}
+header{background:linear-gradient(135deg,#1d4ed8,#7c3aed);padding:28px;border-radius:20px;box-shadow:0 15px 35px #0005;margin-bottom:20px}
+h1{margin:0 0 8px;font-size:32px}.subtitle{opacity:.9}
+.tabs{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.tab{border:1px solid #334155;background:#1e293b;color:#cbd5e1;padding:11px 16px;border-radius:12px;cursor:pointer;font-weight:600}
+.tab.active{background:#2563eb;color:white;border-color:#60a5fa}
+.panel{display:none;background:#111827;border:1px solid #263244;border-radius:18px;padding:22px;box-shadow:0 10px 25px #0003}
+.panel.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.card{background:#172033;border:1px solid #2b3850;border-radius:15px;padding:18px}
+label{display:block;margin:9px 0 6px;color:#cbd5e1;font-weight:600}
+input,select,button{font:inherit}
+input,select{width:100%;padding:11px;border-radius:10px;border:1px solid #475569;background:#0f172a;color:#fff}
+button{padding:11px 16px;border:0;border-radius:10px;background:#2563eb;color:#fff;cursor:pointer;font-weight:700;margin-top:10px}
+button:hover{filter:brightness(1.12)}button.secondary{background:#475569}button.danger{background:#dc2626}
+.array{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.cell{min-width:72px;padding:12px 8px;background:#1e3a8a;border:2px solid #60a5fa;border-radius:12px;text-align:center;transition:.25s}
+.cell .idx{font-size:12px;color:#bfdbfe}.cell .val{font-size:22px;font-weight:800}
+.cell.active{background:#92400e;border-color:#fbbf24;transform:translateY(-5px)}
+.cell.found{background:#166534;border-color:#4ade80}
+.cell.deleted{background:#7f1d1d;border-color:#f87171}
+.formula{background:#0b1220;border-left:4px solid #60a5fa;padding:14px;border-radius:8px;margin-top:12px;font-family:monospace;overflow:auto}
+.result{margin-top:15px;padding:14px;border-radius:10px;background:#0b1220;border:1px solid #334155;min-height:48px}
+.log{max-height:220px;overflow:auto;background:#0b1220;border-radius:10px;padding:10px;margin-top:12px}
+.log div{padding:7px;border-bottom:1px solid #1e293b}
+.note{color:#94a3b8;font-size:14px}.success{color:#86efac}.warn{color:#fde68a}
+footer{text-align:center;color:#64748b;padding:24px}
+@media(max-width:600px){.container{padding:12px}h1{font-size:25px}.cell{min-width:58px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Array Algorithm Simulator</h1>
+<div class="subtitle">Interactive simulation of address calculation, insertion, deletion, linear search and binary search</div>
+</header>
+
+<div class="tabs">
+<button class="tab active" onclick="showTab('address',this)">Address Calculation</button>
+<button class="tab" onclick="showTab('insert',this)">Insertion</button>
+<button class="tab" onclick="showTab('delete',this)">Deletion</button>
+<button class="tab" onclick="showTab('linear',this)">Linear Search</button>
+<button class="tab" onclick="showTab('binary',this)">Binary Search</button>
+</div>
+
+<section id="address" class="panel active">
+<h2>1. Array Address Calculation</h2>
+<p class="note">For a 1-D array: LOC(A[i]) = Base + (i − Lower Bound) × Width</p>
+<div class="grid">
+<div class="card">
+<label>Array values</label><input id="addrArr" value="10,20,30,40,50">
+<label>Base Address</label><input id="base" type="number" value="1000">
+<label>Lower Bound</label><input id="lb" type="number" value="0">
+<label>Element Width (bytes)</label><input id="width" type="number" value="4">
+<label>Index to calculate</label><input id="addrIndex" type="number" value="3">
+<button onclick="calcAddress()">Calculate Address</button>
+</div>
+<div class="card"><h3>Memory Representation</h3><div id="addrArray" class="array"></div><div id="addrResult" class="result">Enter values and calculate.</div></div>
+</div>
+</section>
+
+<section id="insert" class="panel">
+<h2>2. Insertion in Array</h2>
+<div class="grid">
+<div class="card">
+<label>Initial array</label><input id="insArr" value="10,20,30,40,50">
+<label>Value to insert</label><input id="insVal" type="number" value="25">
+<label>Position / index</label><input id="insPos" type="number" value="2" min="0">
+<button onclick="insertArray()">Insert & Simulate</button>
+<button class="secondary" onclick="resetInsert()">Reset</button>
+</div>
+<div class="card"><h3>Visualization</h3><div id="insArray" class="array"></div><div id="insResult" class="result">Ready.</div><div id="insLog" class="log"></div></div>
+</div>
+</section>
+
+<section id="delete" class="panel">
+<h2>3. Deletion from Array</h2>
+<div class="grid">
+<div class="card">
+<label>Initial array</label><input id="delArr" value="10,20,30,40,50">
+<label>Position / index to delete</label><input id="delPos" type="number" value="2" min="0">
+<button onclick="deleteArray()">Delete & Simulate</button>
+<button class="secondary" onclick="resetDelete()">Reset</button>
+</div>
+<div class="card"><h3>Visualization</h3><div id="delArray" class="array"></div><div id="delResult" class="result">Ready.</div><div id="delLog" class="log"></div></div>
+</div>
+</section>
+
+<section id="linear" class="panel">
+<h2>4. Linear Search</h2>
+<div class="grid">
+<div class="card">
+<label>Array</label><input id="linArr" value="12,7,25,9,31,18">
+<label>Search value</label><input id="linVal" type="number" value="31">
+<button onclick="linearSearch()">Start Linear Search</button>
+</div>
+<div class="card"><h3>Search Steps</h3><div id="linArray" class="array"></div><div id="linResult" class="result">Ready.</div><div id="linLog" class="log"></div></div>
+</div>
+</section>
+
+<section id="binary" class="panel">
+<h2>5. Binary Search</h2>
+<div class="grid">
+<div class="card">
+<label>Sorted array</label><input id="binArr" value="5,10,15,20,25,30,35,40">
+<label>Search value</label><input id="binVal" type="number" value="30">
+<button onclick="binarySearch()">Start Binary Search</button>
+<p class="note">Binary search requires a sorted array.</p>
+</div>
+<div class="card"><h3>Low – Mid – High</h3><div id="binArray" class="array"></div><div id="binResult" class="result">Ready.</div><div id="binLog" class="log"></div></div>
+</div>
+</section>
+
+<footer>Array Algorithm Simulator • B.Tech Data Structures Assignment</footer>
+</div>
+
+<script>
+function showTab(id,btn){
+ document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+ document.getElementById(id).classList.add('active'); btn.classList.add('active');
+}
+function nums(id){return document.getElementById(id).value.split(',').map(x=>Number(x.trim())).filter(x=>!Number.isNaN(x))}
+function draw(id,a,active=-1,found=-1,deleted=-1){
+ const el=document.getElementById(id); el.innerHTML='';
+ a.forEach((v,i)=>{const c=document.createElement('div');c.className='cell';
+ if(i===active)c.classList.add('active'); if(i===found)c.classList.add('found'); if(i===deleted)c.classList.add('deleted');
+ c.innerHTML=`<div class="idx">index ${i}</div><div class="val">${v}</div>`;el.appendChild(c)})
+}
+function log(id,msg){document.getElementById(id).innerHTML+=`<div>${msg}</div>`}
+function clearLog(id){document.getElementById(id).innerHTML=''}
+
+function calcAddress(){
+ const a=nums('addrArr'), base=+baseEl().value, lb=+document.getElementById('lb').value, w=+document.getElementById('width').value, i=+document.getElementById('addrIndex').value;
+ draw('addrArray',a);
+ if(i<lb||i>=lb+a.length){document.getElementById('addrResult').innerHTML='<span class="warn">Index is outside the array bounds.</span>';return}
+ const offset=i-lb, address=base+offset*w;
+ draw('addrArray',a,i);
+ document.getElementById('addrResult').innerHTML=`<div class="formula">LOC(A[${i}]) = ${base} + (${i} − ${lb}) × ${w}<br>= ${base} + ${offset} × ${w}<br>= <b>${address}</b></div><p class="success">Element A[${i}] = ${a[i-lb]} is stored at address ${address}.</p>`;
+}
+function baseEl(){return document.getElementById('base')}
+
+async function insertArray(){
+ let a=nums('insArr'), v=+document.getElementById('insVal').value, p=+document.getElementById('insPos').value;
+ clearLog('insLog'); draw('insArray',a);
+ if(p<0||p>a.length){document.getElementById('insResult').textContent='Invalid position.';return}
+ log('insLog',`Initial array: [${a.join(', ')}]`);
+ for(let i=a.length-1;i>=p;i--){await wait(450);a[i+1]=a[i];draw('insArray',a,i);log('insLog',`Shift A[${i}] → A[${i+1}]`)}
+ await wait(450);a[p]=v;draw('insArray',a,p,-1);log('insLog',`Insert ${v} at index ${p}`);
+ document.getElementById('insResult').innerHTML=`<span class="success">Insertion complete.</span> Final array: [${a.join(', ')}]`;
+}
+function resetInsert(){document.getElementById('insArr').value='10,20,30,40,50';draw('insArray',nums('insArr'));clearLog('insLog');document.getElementById('insResult').textContent='Ready.'}
+
+async function deleteArray(){
+ let a=nums('delArr'), p=+document.getElementById('delPos').value;
+ clearLog('delLog');draw('delArray',a);
+ if(p<0||p>=a.length){document.getElementById('delResult').textContent='Invalid position.';return}
+ const removed=a[p];log('delLog',`Delete A[${p}] = ${removed}`);
+ for(let i=p;i<a.length-1;i++){await wait(450);a[i]=a[i+1];draw('delArray',a,i);log('delLog',`Shift A[${i+1}] → A[${i}]`)}
+ a.pop();await wait(450);draw('delArray',a);log('delLog','Remove the last duplicate element');
+ document.getElementById('delResult').innerHTML=`<span class="success">Deletion complete.</span> Deleted ${removed} from index ${p}. Final array: [${a.join(', ')}]`;
+}
+function resetDelete(){document.getElementById('delArr').value='10,20,30,40,50';draw('delArray',nums('delArr'));clearLog('delLog');document.getElementById('delResult').textContent='Ready.'}
+
+async function linearSearch(){
+ const a=nums('linArr'), target=+document.getElementById('linVal').value;clearLog('linLog');draw('linArray',a);
+ for(let i=0;i<a.length;i++){await wait(500);draw('linArray',a,i);log('linLog',`Step ${i+1}: Compare ${a[i]} with ${target}`);
+ if(a[i]===target){draw('linArray',a,-1,i);document.getElementById('linResult').innerHTML=`<span class="success">Found!</span> ${target} is at index ${i}. Comparisons = ${i+1}.`;return}}
+ document.getElementById('linResult').innerHTML=`<span class="warn">Not found.</span> ${target} is not present. Comparisons = ${a.length}.`;
+}
+async function binarySearch(){
+ const a=nums('binArr'), target=+document.getElementById('binVal').value;clearLog('binLog');
+ if(a.some((v,i)=>i&&a[i-1]>v)){document.getElementById('binResult').innerHTML='<span class="warn">Please enter a sorted array.</span>';draw('binArray',a);return}
+ let low=0,high=a.length-1,steps=0;draw('binArray',a);
+ while(low<=high){let mid=Math.floor((low+high)/2);steps++;await wait(650);draw('binArray',a,mid);log('binLog',`Step ${steps}: Low=${low}, Mid=${mid}, High=${high}; A[Mid]=${a[mid]}`);
+ if(a[mid]===target){draw('binArray',a,-1,mid);document.getElementById('binResult').innerHTML=`<span class="success">Found!</span> ${target} is at index ${mid}. Comparisons = ${steps}.`;return}
+ if(a[mid]<target){log('binLog',`${a[mid]} < ${target} → search right half`);low=mid+1}
+ else{log('binLog',`${a[mid]} > ${target} → search left half`);high=mid-1}}
+ document.getElementById('binResult').innerHTML=`<span class="warn">Not found.</span> ${target} is not present. Comparisons = ${steps}.`;
+}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+draw('addrArray',nums('addrArr'));draw('insArray',nums('insArr'));draw('delArray',nums('delArr'));draw('linArray',nums('linArr'));draw('binArray',nums('binArr'));
+</script>
+</body>
+</html>
